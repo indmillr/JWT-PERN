@@ -3,7 +3,8 @@ const pool = require("../db");
 const bcrypt = require("bcrypt");
 const jwtGenerator = require("../utils/jwtGenerator");
 
-// registering
+// ---------- REGISTER ----------
+
 router.post("/register", async (req, res) => {
   try {
     // Step 1: Destructure req.body (name, email, password)
@@ -36,6 +37,41 @@ router.post("/register", async (req, res) => {
     // Step 5: Generate the JWT Token
     const token = jwtGenerator(newUser.rows[0].user_id);
 
+    res.json({ token });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// ---------- LOGIN ----------
+
+router.post("/login", async (req, res) => {
+  try {
+    // Step 1: Destructure req.body
+    const { email, password } = req.body;
+
+    // Step 2: Check if user exists (if not, throw err)
+    const user = await pool.query("SELECT * FROM users WHERE user_email=$1", [
+      email,
+    ]);
+
+    if (user.rows.length === 0) {
+      return res.status(401).json("Password or Email is incorrect");
+    }
+
+    // Step 3: Check if incoming password is same as db password
+    const validPassword = await bcrypt.compare(
+      password,
+      user.rows[0].user_password,
+    );
+
+    if (!validPassword) {
+      return res.status(401).json("Password or Email is incorrect");
+    }
+
+    // Step 4: Give the JWT Token
+    const token = jwtGenerator(user.rows[0].user_id);
     res.json({ token });
   } catch (err) {
     console.error(err.message);
