@@ -3,7 +3,7 @@ const pool = require("../db");
 const bcrypt = require("bcrypt");
 const jwtGenerator = require("../utils/jwtGenerator");
 const validInfo = require("../middleware/validInfo");
-const authorization = require("../middleware/authorization");
+const authorize = require("../middleware/authorization");
 
 // ---------- REGISTER ----------
 
@@ -81,7 +81,7 @@ router.post("/login", validInfo, async (req, res) => {
   }
 });
 
-router.get("/is-verify", authorization, async (req, res) => {
+router.get("/is-verify", authorize, async (req, res) => {
   try {
     res.json(true);
   } catch (err) {
