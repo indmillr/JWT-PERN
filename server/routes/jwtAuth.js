@@ -3,6 +3,7 @@ const pool = require("../db");
 const bcrypt = require("bcrypt");
 const jwtGenerator = require("../utils/jwtGenerator");
 const validInfo = require("../middleware/validInfo");
+const authorization = require("../middleware/authorization");
 
 // ---------- REGISTER ----------
 
@@ -74,6 +75,15 @@ router.post("/login", validInfo, async (req, res) => {
     // Step 4: Give the JWT Token
     const token = jwtGenerator(user.rows[0].user_id);
     res.json({ token });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+router.get("/is-verify", authorization, async (req, res) => {
+  try {
+    res.json(true);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
